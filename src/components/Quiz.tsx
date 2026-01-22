@@ -47,7 +47,7 @@ const questions: Question[] = [
   {
     id: 5,
     question: 'Arc Testnet launched publicly in what month of 2025?',
-    options: ['Июль', 'August', 'September', 'October'],
+    options: ['July', 'August', 'September', 'October'],
     correct: 3,
   },
   {
@@ -105,16 +105,32 @@ export default function Quiz() {
 
   const handleAnswer = (idx: number) => {
     if (idx === currentQuestion.correct) {
-      setScore(prev => prev + 1);
+      setScore((prev) => prev + 1);
       setWrongAttempt(false);
       if (currentIndex < questions.length - 1) {
-        setCurrentIndex(prev => prev + 1);
+        setCurrentIndex((prev) => prev + 1);
       } else {
         setShowInput(true);
       }
     } else {
       setWrongAttempt(true);
     }
+  };
+
+  // Сброс только текущей попытки (повторить вопрос)
+  const retryQuestion = () => {
+    setWrongAttempt(false);
+  };
+
+  // Полный сброс теста
+  const restartQuiz = () => {
+    setCurrentIndex(0);
+    setScore(0);
+    setShowInput(false);
+    setAddress('');
+    setWrongAttempt(false);
+    setMintStatus('idle');
+    setTxHash(null);
   };
 
   const handleMint = async () => {
@@ -151,18 +167,34 @@ export default function Quiz() {
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-md mt-10">
       {!showInput ? (
         <>
-          <h1 className="text-2xl font-bold mb-6 text-center">
-            Arc Testnet Quiz ({currentIndex + 1} / {questions.length})
-          </h1>
-          <h2 className="text-xl mb-4">{currentQuestion.question}</h2>
+          {/* Заголовок + кнопка перезапуска */}
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold">
+              Arc Testnet Quiz ({currentIndex + 1} / {questions.length})
+            </h1>
+            <button
+              onClick={restartQuiz}
+              className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg transition text-sm font-medium"
+            >
+              Restart Quiz
+            </button>
+          </div>
+
+          <h2 className="text-xl font-medium mb-6">{currentQuestion.question}</h2>
 
           <div className="flex flex-col gap-3">
             {currentQuestion.options.map((opt, idx) => (
               <button
                 key={idx}
                 onClick={() => handleAnswer(idx)}
-                className="p-4 text-left border rounded hover:bg-blue-50 transition disabled:opacity-50"
                 disabled={wrongAttempt}
+                className={`
+                  w-full p-4 text-left border rounded-lg transition
+                  ${wrongAttempt 
+                    ? 'opacity-60 cursor-not-allowed bg-gray-50' 
+                    : 'hover:bg-blue-50 hover:border-blue-300 active:bg-blue-100'
+                  }
+                `}
               >
                 {opt}
               </button>
@@ -170,8 +202,22 @@ export default function Quiz() {
           </div>
 
           {wrongAttempt && (
-            <div className="mt-4 p-3 bg-red-100 text-red-800 rounded">
-              Incorrect! Try again.
+            <div className="mt-6 p-5 bg-red-50 border border-red-200 rounded-xl">
+              <p className="text-red-700 font-medium mb-4">Incorrect! Try again.</p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={retryQuestion}
+                  className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-medium"
+                >
+                  Try this question again
+                </button>
+                <button
+                  onClick={restartQuiz}
+                  className="flex-1 px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition font-medium"
+                >
+                  Start quiz over
+                </button>
+              </div>
             </div>
           )}
         </>
@@ -181,43 +227,49 @@ export default function Quiz() {
             Congratulations! 10/10
           </h2>
 
-          <p className="mb-6">
-            Enter your EVM address and the NFT will be sent automatically (Arc Testnet)
+          <p className="mb-6 text-gray-700">
+            Enter your EVM address — the NFT will be sent automatically (Arc Testnet)
           </p>
 
           <input
             type="text"
             value={address}
-            onChange={e => setAddress(e.target.value.trim())}
+            onChange={(e) => setAddress(e.target.value.trim())}
             placeholder="0x..."
-            className="w-full p-3 border rounded mb-4 font-mono"
+            className="w-full p-3 border border-gray-300 rounded-lg mb-6 font-mono text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
 
           <button
             onClick={handleMint}
-            disabled={mintStatus === 'loading' || !address}
-            className="bg-blue-600 text-white px-8 py-3 rounded disabled:opacity-50 hover:bg-blue-700"
+            disabled={mintStatus === 'loading' || !address.trim()}
+            className={`
+              px-10 py-4 rounded-lg font-medium text-lg transition
+              ${mintStatus === 'loading' || !address.trim()
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }
+            `}
           >
-            {mintStatus === 'loading' ? 'Mint...' : 'Get NFT'}
+            {mintStatus === 'loading' ? 'Minting...' : 'Get NFT'}
           </button>
 
           {mintStatus === 'success' && txHash && (
-            <div className="mt-6 p-4 bg-green-100 text-green-800 rounded">
-              NFT sent!{' '}
+            <div className="mt-8 p-5 bg-green-50 border border-green-200 rounded-xl">
+              <p className="text-green-700 font-medium mb-2">NFT successfully sent!</p>
               <a
                 href={`https://testnet.arcscan.app/tx/${txHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline font-bold"
+                className="text-blue-600 hover:underline font-medium"
               >
-                Tx: {txHash.slice(0, 8)}...
+                Transaction: {txHash.slice(0, 10)}... → View on explorer
               </a>
             </div>
           )}
 
           {mintStatus === 'error' && (
-            <div className="mt-4 p-3 bg-red-100 text-red-800 rounded">
-              Mint error. Try again later or check the address.
+            <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
+              Mint failed. Please try again later or check your address.
             </div>
           )}
         </div>
