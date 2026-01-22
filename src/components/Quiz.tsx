@@ -2,6 +2,13 @@
 
 import { useState } from 'react';
 
+type Question = {
+  id: number;
+  question: string;
+  options: string[];
+  correct: number;   // индекс правильного ответа (0-based)
+};
+
 const questions: Question[] = [
   {
     id: 1,
