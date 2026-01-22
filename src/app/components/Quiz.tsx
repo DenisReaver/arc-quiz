@@ -15,7 +15,7 @@ const questions: Question[] = [
     question: 'What is Arc Network?',
     options: [
       'Layer-2 solution on Ethereum from Circle',
-      'Circle's open Layer-1 blockchain with native USDC gas',
+      'Circles open Layer-1 blockchain with native USDC gas',
       'USDC testnet on Solana',
       'A private blockchain for institutions only',
     ],
@@ -69,7 +69,7 @@ const questions: Question[] = [
   },
   {
     id: 8,
-    question: 'What is Arc's main goal according to Circle?',
+    question: 'What is Arc main goal according to Circle?',
     options: [
       'Fast Memcoins',
       'Economic OS for the Internet with programmable money',
